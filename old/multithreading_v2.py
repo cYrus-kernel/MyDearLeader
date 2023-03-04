@@ -7,7 +7,7 @@ import time
 import xlwings as xw 
 
 def Get_StockPrice(Symbol,Date):
-
+    
     url = f'https://www.twse.com.tw/exchangeReport/STOCK_DAY?response=json&date={Date}&stockNo={Symbol}' #股票的網址
 
     data = requests.get(url).text
@@ -33,42 +33,42 @@ def Get_StockPrice(Symbol,Date):
 
     StockPrice = StockPrice[['Open','High','Low','Close','Volume']]
     #xw.view(StockPrice)
-    print(StockPrice)
+    return StockPrice
 
-def inputYear():
-    while(1==1):
-        num =str(input("請輸入年份:  "))
-        if(int(num)<2010):
-            print("查詢日期小於99年1月4日，請重新查詢!")
-            continue
-        else:
-            return num
+        
+def getdata():
+    yearstart = int(input("請輸入起始年分:  "))
+    yearend = int(input("請輸入截止年分:  "))
+    symbol =str(input("請輸入股票編號:  "))
+    monthstart =1
+    monthend =12
+    start_time = time.time()  # 開始時間
+    dates=[]
+    symbols=[]
 
-year = inputYear()
+    for year in range(yearstart,yearend+1):
+        for month in range(monthstart,monthend+1):
+            yearstr=str(year)
+            if month>9:
+                mon=str(month)
+                date=yearstr+mon+"01"
+            else:
+                mon=str(month)
+                date=yearstr+"0"+mon+"01"
+            dates.append(date)
+            symbols.append(symbol)
+    print("multithreading...")
 
-symbol =str(input("請輸入股票編號:  "))
-monthstart =int(input("請輸入起始月份:  "))
-monthend =int(input("請輸入截止月份:  "))
-start_time = time.time()  # 開始時間
-dates=[]
-symbols=[]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        try:
+            result=list(executor.map(Get_StockPrice,symbols,dates))
+        except:
+            print("Something is wrong")
+    
+    return result
+    
+mydata=getdata()
+finaldata = pd.concat(mydata)
+print(finaldata)
 
-for month in range(monthstart,monthend+1):
-    if month>9:
-        mon=str(month)
-        date=year+mon+"01"
-    else:
-        mon=str(month)
-        date=year+"0"+mon+"01"
-    dates.append(date)
-    symbols.append(symbol)
-print("multithreading...")
-
-with concurrent.futures.ThreadPoolExecutor(max_workers=12) as executor:
-    try:
-        executor.map(Get_StockPrice,symbols,dates)
-    except:
-        print("Something is wrong")
-
-end_time = time.time()
-print(f"{end_time - start_time} 秒爬取 ")
+finaldata.to_csv(r'C:\Users\mikai\GitHub\MyDearLeader\2330.csv', encoding='utf-8')
