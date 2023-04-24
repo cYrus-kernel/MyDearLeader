@@ -49,15 +49,16 @@ df['PredictedFive'].iloc[- y_predFive.shape[0]:] = y_predFive.flatten()
 
 res=pd.concat([stock_data['DateTime'],df],axis=1)
 test=res[['DateTime','Open','Close', 'PredictedOne','PredictedThree','PredictedFive']].dropna().reset_index(drop=True)
+test.rename({'Close': 'Closing Price'}, axis=1, inplace=True)
 
-plot=test.plot(x='DateTime',y=['Close','PredictedOne'])
+plot=test.plot(x='DateTime',y=['Closing Price','PredictedOne'])
 fig = plot.get_figure()
 fig.savefig('PredictedOne.png')
 
-plot2=test.plot(x='DateTime',y=['Close','PredictedThree'])
+plot2=test.plot(x='DateTime',y=['Closing Price','PredictedThree'])
 fig2 = plot2.get_figure()
 fig2.savefig('PredictedThree.png')
 
-plot3=test.plot(x='DateTime',y=['Close','PredictedFive'])
+plot3=test.plot(x='DateTime',y=['Closing Price','PredictedFive'])
 fig3 = plot3.get_figure()
 fig3.savefig('PredictedFive.png')
